@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { Shield, Loader } from "lucide-react";
+import { Shield, Loader, AlertCircle } from 'lucide-react';
 
 export default function Dashboard() {
   const [secretData, setSecretData] = useState("");
@@ -69,23 +69,27 @@ export default function Dashboard() {
       <div className="container mx-auto p-6">
         <h2 className="text-3xl font-bold text-gray-800 mb-6">Dashboard</h2>
         {loading ? (
-          <div className="flex items-center justify-center">
-            <Loader className="w-8 h-8 text-blue-500 animate-spin" />
+          <div className="flex items-center justify-center p-12">
+            <Loader className="w-12 h-12 text-blue-500 animate-spin" />
           </div>
         ) : secretData ? (
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:scale-105">
             <div className="flex items-center space-x-3 mb-4">
-              <Shield className="w-6 h-6 text-green-500" />
-              <h3 className="text-xl font-semibold text-gray-700">
-                Protected Information
-              </h3>
+              <Shield className="w-8 h-8 text-green-500" />
+              <h3 className="text-2xl font-semibold text-gray-700">Protected Information</h3>
             </div>
-            <p className="text-gray-600">{secretData}</p>
+            <p className="text-gray-600 text-lg leading-relaxed">{secretData}</p>
           </div>
         ) : (
-          <p className="text-red-500">No protected data available.</p>
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-md" role="alert">
+            <div className="flex items-center">
+              <AlertCircle className="w-6 h-6 mr-2" />
+              <p>No protected data available.</p>
+            </div>
+          </div>
         )}
       </div>
     </div>
   );
 }
+

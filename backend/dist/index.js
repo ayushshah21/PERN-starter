@@ -17,7 +17,6 @@ app.use((0, express_session_1.default)({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        // Configure your cookie, e.g. maxAge, sameSite, etc.
         maxAge: 1000 * 60 * 60 * 24, // 1 day
     },
 }));

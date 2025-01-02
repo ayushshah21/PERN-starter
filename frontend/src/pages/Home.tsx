@@ -1,9 +1,111 @@
-import { Link } from "react-router-dom";
-import { ArrowRight, Database, Server, Layout, Terminal } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { ArrowRight, Database, Server, Layout, Terminal } from "lucide-react";
+import axios from "axios";
 
 export default function Home() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+
+  useEffect(() => {
+    const token = searchParams.get("token");
+    if (token) {
+      localStorage.setItem("token", token);
+      navigate("/dashboard");
+      return;
+    }
+
+    // Check if user is authenticated but don't redirect
+    const checkAuth = async () => {
+      const existingToken = localStorage.getItem("token");
+      if (existingToken) {
+        try {
+          const response = await axios.get(
+            "http://localhost:4000/api/auth/protected",
+            {
+              headers: {
+                Authorization: `Bearer ${existingToken}`,
+              },
+            }
+          );
+          if (response.data.user) {
+            setIsAuthenticated(true);
+            setUserEmail(response.data.user.email);
+          }
+        } catch (err) {
+          console.error(err);
+          localStorage.removeItem("token");
+        }
+      }
+    };
+
+    checkAuth();
+  }, [navigate, searchParams]);
+
+  const handleLogout = async () => {
+    try {
+      await axios.get("http://localhost:4000/api/auth/logout");
+      localStorage.removeItem("token");
+      setIsAuthenticated(false);
+      setUserEmail("");
+    } catch (err) {
+      console.error("Logout failed:", err);
+      localStorage.removeItem("token");
+      setIsAuthenticated(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      {/* Navigation Bar */}
+      <nav className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16 items-center">
+            <div className="flex-shrink-0">
+              <Link to="/" className="text-blue-600 font-bold text-xl">
+                PERN Stack
+              </Link>
+            </div>
+            <div className="flex items-center space-x-4">
+              {isAuthenticated ? (
+                <>
+                  <span className="text-gray-700">Welcome, {userEmail}</span>
+                  <Link
+                    to="/dashboard"
+                    className="text-blue-600 hover:text-blue-700 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Dashboard
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="text-red-600 hover:text-red-700 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium"
+                  >
+                    Sign up
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
+
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 sm:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -52,11 +154,16 @@ export default function Home() {
           <div className="mt-20">
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {features.map((feature) => (
-                <div key={feature.name} className="bg-white rounded-lg shadow-md p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg">
+                <div
+                  key={feature.name}
+                  className="bg-white rounded-lg shadow-md p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg"
+                >
                   <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-4">
                     {feature.icon}
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.name}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {feature.name}
+                  </h3>
                   <p className="text-gray-500">{feature.description}</p>
                 </div>
               ))}
@@ -115,4 +222,3 @@ const features = [
     icon: <Terminal className="w-6 h-6 text-blue-600" />,
   },
 ];
-

@@ -17,7 +17,6 @@ app.use(
       resave: false,
       saveUninitialized: false,
       cookie: {
-        // Configure your cookie, e.g. maxAge, sameSite, etc.
         maxAge: 1000 * 60 * 60 * 24, // 1 day
       },
     })

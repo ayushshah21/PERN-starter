@@ -1,6 +1,7 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { PrismaClient } from "@prisma/client";
+import jwt from 'jsonwebtoken';
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -50,10 +51,12 @@ passport.serializeUser((user: any, done) => {
 
 passport.deserializeUser(async (id: string, done) => {
   try {
-    const user = await prisma.user.findUnique({ where: { id } });
+    const user = await prisma.user.findUnique({
+      where: { id },
+    });
     done(null, user);
   } catch (error) {
-    done(error, null);
+    done(error);
   }
 });
 
